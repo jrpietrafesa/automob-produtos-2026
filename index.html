@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMW Financial Services — Análise de Agregados 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#090b0f;--surface:#0f1218;--surface2:#161b24;--surface3:#1d2433;
+    --border:rgba(255,255,255,0.07);--blue:#0066CC;--blue-light:#1a80e6;
+    --blue-glow:rgba(0,102,204,0.18);--gold:#c8a84b;--green:#22c97e;
+    --red:#e84040;--orange:#f07630;--text:#e8eaf0;--text2:#8a9bb8;--text3:#4a5a72;
+    --font-display:'Barlow Condensed',sans-serif;--font-body:'Barlow',sans-serif;
+    --shadow:0 2px 12px rgba(0,0,0,0.4);
+  }
+  html.light {
+    --bg:#f0f4f9;--surface:#ffffff;--surface2:#e8eef7;--surface3:#d4dcea;
+    --border:rgba(0,0,0,0.09);--blue:#0055bb;--blue-light:#0066CC;
+    --blue-glow:rgba(0,85,187,0.12);--gold:#b08a20;--green:#16a860;
+    --red:#cc2222;--orange:#d05e10;--text:#0d1a2e;--text2:#3d5270;--text3:#7a90b0;
+    --shadow:0 2px 12px rgba(0,0,0,0.08);
+  }
+  body,header,.card,.kpi-card,.tipo-card,.filter-btn,.search-input,.tabs,.tab,
+  .rank-table th,.rank-table td,.pct-bar-bg,.bar-row-track{
+    transition:background .3s,color .3s,border-color .3s;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:14px;scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden}
+
+  /* HEADER */
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;
+    display:flex;align-items:center;justify-content:space-between;height:64px;
+    position:sticky;top:0;z-index:100}
+  .header-brand{display:flex;align-items:center;gap:14px}
+  .bmw-logo{width:40px;height:40px;border-radius:50%;
+    background:conic-gradient(#fff 0deg 90deg,#0066CC 90deg 180deg,#fff 180deg 270deg,#0066CC 270deg 360deg);
+    border:2px solid #333;box-shadow:0 0 0 1px rgba(255,255,255,0.15);flex-shrink:0}
+  .header-title{font-family:var(--font-display);font-size:1.5rem;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+  .header-subtitle{font-size:.75rem;color:var(--text2);letter-spacing:.12em;text-transform:uppercase}
+  .header-right{display:flex;align-items:center;gap:14px}
+  .badge-live{background:rgba(34,201,126,.12);border:1px solid rgba(34,201,126,.3);
+    color:var(--green);font-size:.65rem;font-weight:700;letter-spacing:.15em;
+    text-transform:uppercase;padding:3px 10px;border-radius:20px}
+  .header-period{font-size:.72rem;color:var(--text2);letter-spacing:.1em;text-transform:uppercase}
+  .theme-toggle{width:42px;height:24px;background:var(--surface3);border:1px solid var(--border);
+    border-radius:12px;cursor:pointer;position:relative;display:flex;align-items:center;padding:2px 3px;transition:background .3s}
+  .theme-toggle:hover{border-color:var(--blue)}
+  .theme-knob{width:18px;height:18px;border-radius:50%;background:var(--blue);display:flex;
+    align-items:center;justify-content:center;font-size:10px;
+    transition:transform .3s cubic-bezier(.4,0,.2,1),background .3s;
+    box-shadow:0 1px 4px rgba(0,0,0,0.3);transform:translateX(0)}
+  html.light .theme-knob{transform:translateX(18px);background:var(--gold)}
+
+  /* MAIN */
+  .main{padding:24px 32px 64px;max-width:1600px;margin:0 auto}
+
+  /* SECTION LABEL */
+  .section-label{font-family:var(--font-display);font-size:.65rem;font-weight:700;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--blue);margin-bottom:12px;
+    display:flex;align-items:center;gap:8px}
+  .section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--blue-glow),transparent)}
+
+  /* FILTER BARS */
+  .filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .filter-label{font-size:.68rem;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap}
+  .filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);
+    font-family:var(--font-body);font-size:.72rem;font-weight:500;letter-spacing:.05em;
+    padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .2s;text-transform:uppercase}
+  .filter-btn:hover{border-color:var(--blue);color:var(--text)}
+  .filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 12px var(--blue-glow)}
+  .filter-btn.mes-btn.active{background:var(--surface3);border-color:var(--blue);color:var(--blue);
+    box-shadow:none;font-weight:700}
+
+  /* FILTER STRIP */
+  .filter-strip{display:flex;align-items:center;gap:6px;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:8px 16px;margin-bottom:10px;flex-wrap:wrap}
+  .filter-strip-title{font-family:var(--font-display);font-size:.7rem;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-right:6px;white-space:nowrap}
+  .mes-btn{background:transparent;border:1px solid transparent;color:var(--text2);
+    font-family:var(--font-display);font-size:.85rem;font-weight:700;letter-spacing:.1em;
+    padding:5px 16px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase}
+  .mes-btn:hover{background:var(--surface2);color:var(--text)}
+  .mes-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;
+    box-shadow:0 0 10px var(--blue-glow)}
+
+  /* MARCA FILTER BUTTONS */
+  .marca-btn{background:transparent;border:1px solid var(--border);color:var(--text2);
+    font-family:var(--font-display);font-size:.85rem;font-weight:700;letter-spacing:.1em;
+    padding:5px 18px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+    display:flex;align-items:center;gap:7px}
+  .marca-btn:hover{color:var(--text);background:var(--surface2)}
+  .marca-btn.active[id="marca-btn-ALL"]    {background:var(--surface3);border-color:var(--blue);color:var(--text)}
+  .marca-btn.active[id="marca-btn-BMW"]    {background:#0066CC22;border-color:#0066CC;color:#4da6ff}
+  .marca-btn.active[id="marca-btn-MOTORRAD"]{background:#e8404022;border-color:#e84040;color:#e84040}
+  .marca-btn.active[id="marca-btn-MINI"]   {background:#c8a84b22;border-color:#c8a84b;color:#c8a84b}
+  .marca-btn.active[id="marca-btn-OUTROS"] {background:var(--surface3);border-color:var(--text3);color:var(--text2)}
+  .prod-btn{background:transparent;border:1px solid var(--border);color:var(--text2);
+    font-family:var(--font-display);font-size:.8rem;font-weight:700;letter-spacing:.08em;
+    padding:5px 14px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+    display:flex;align-items:center;gap:6px}
+  .prod-btn:hover{color:var(--text);background:var(--surface2)}
+  .prod-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .prod-btn.active-ppi      {background:#0066CC22;border-color:#0066CC;color:#4da6ff}
+  .prod-btn.active-acessorios{background:#22c97e22;border-color:#22c97e;color:#22c97e}
+  .prod-btn.active-blindagem {background:#c8a84b22;border-color:#c8a84b;color:#c8a84b}
+  .prod-btn.active-manutencao{background:#f0763022;border-color:#f07630;color:#f07630}
+  .prod-btn.active-garantia  {background:#a04ee822;border-color:#a04ee8;color:#a04ee8}
+  .prod-btn.active-ALL{background:var(--surface3);border-color:var(--blue);color:var(--text)}
+
+  /* KPI GRID */
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:18px 20px 14px;position:relative;overflow:hidden;cursor:default;
+    transition:border-color .25s,transform .2s,box-shadow .25s}
+  .kpi-card:hover{border-color:rgba(0,102,204,.4);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--blue),var(--blue-light));opacity:0;transition:opacity .25s}
+  .kpi-card:hover::before{opacity:1}
+  .kpi-icon{font-size:1.3rem;margin-bottom:8px;display:block;opacity:.7}
+  .kpi-value{font-family:var(--font-display);font-size:2rem;font-weight:800;color:#fff;
+    line-height:1;letter-spacing:-.01em}
+  html.light .kpi-value{color:var(--text)}
+  .kpi-label{font-size:.67rem;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;margin-top:5px}
+  .kpi-sub{font-size:.68rem;color:var(--text3);margin-top:3px}
+  .kpi-accent-blue .kpi-value{color:var(--blue-light)}
+  .kpi-accent-green .kpi-value{color:var(--green)}
+  .kpi-accent-gold .kpi-value{color:var(--gold)}
+
+  /* TIPO GRID */
+  .tipo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+  .tipo-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;text-align:center;position:relative;overflow:hidden}
+  .tipo-card::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;border-radius:2px}
+  .tipo-card:nth-child(1)::after{background:#0066CC}
+  .tipo-card:nth-child(2)::after{background:#22c97e}
+  .tipo-card:nth-child(3)::after{background:#c8a84b}
+  .tipo-card:nth-child(4)::after{background:#f07630}
+  .tipo-card:nth-child(5)::after{background:#a04ee8}
+  .tipo-name{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+  .tipo-val{font-family:var(--font-display);font-size:1.4rem;font-weight:800}
+  .tipo-pct{font-size:.65rem;color:var(--text3);margin-top:2px}
+
+  /* GRID LAYOUTS */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .grid-3{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+
+  /* CARD */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .card-header{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px 11px;border-bottom:1px solid var(--border)}
+  .card-title{font-family:var(--font-display);font-size:.9rem;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+  .card-meta{font-size:.65rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+  .card-body{padding:14px 18px}
+
+  /* RANK TABLE */
+  .rank-table{width:100%;border-collapse:collapse}
+  .rank-table th{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--text3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--border)}
+  .rank-table th.right{text-align:right}
+  .rank-table td{padding:8px 10px;font-size:.78rem;color:var(--text2);
+    border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+  html.light .rank-table td{border-bottom:1px solid rgba(0,0,0,.04)}
+  .rank-table td.right{text-align:right}
+  .rank-table tr:last-child td{border-bottom:none}
+  .rank-table tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+  html.light .rank-table tr:hover td{background:rgba(0,0,0,.03)}
+  .rank-num{font-family:var(--font-display);font-size:.75rem;font-weight:700;color:var(--text3);
+    min-width:22px;display:inline-block;text-align:center}
+  .rank-num.gold{color:var(--gold)}
+  .rank-num.silver{color:#9ba8b8}
+  .rank-num.bronze{color:#c87340}
+  .vend-name{font-weight:500;color:var(--text);font-size:.8rem}
+  .store-tag{font-size:.58rem;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-top:1px}
+  .valor-cell{font-family:var(--font-display);font-size:.9rem;font-weight:700;color:var(--text)}
+  .pct-bar-wrap{display:flex;align-items:center;gap:7px}
+  .pct-bar-bg{flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;min-width:40px}
+  .pct-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--blue-light));transition:width .8s cubic-bezier(.4,0,.2,1)}
+  .pct-bar-fill.green{background:linear-gradient(90deg,#16a065,var(--green))}
+  .pct-bar-fill.orange{background:linear-gradient(90deg,#c85820,var(--orange))}
+  .pct-text{font-family:var(--font-display);font-size:.8rem;font-weight:700;color:var(--text2);min-width:36px;text-align:right}
+
+  /* DONUT */
+  .donut-container{display:flex;align-items:center;gap:16px;padding:8px 0}
+  .donut-legend{flex:1}
+  .legend-item{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  html.light .legend-item{border-bottom:1px solid rgba(0,0,0,.05)}
+  .legend-item:last-child{border-bottom:none}
+  .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+  .legend-name{flex:1;font-size:.7rem;color:var(--text2)}
+  .legend-val{font-family:var(--font-display);font-size:.8rem;font-weight:700;color:var(--text)}
+  .legend-pct{font-size:.65rem;color:var(--text3);min-width:30px;text-align:right}
+
+  /* TREND */
+  .trend-row{display:flex;align-items:flex-end;gap:6px;height:85px;padding:0 4px}
+  .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+  .trend-bar{width:100%;border-radius:4px 4px 0 0;cursor:pointer;transition:filter .2s}
+  .trend-bar:hover{filter:brightness(1.25)}
+  .trend-label{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+  .trend-val{font-family:var(--font-display);font-size:.72rem;font-weight:700;color:var(--text2)}
+  .trend-pct{font-size:.6rem;color:var(--text3)}
+
+  /* BAR CHART */
+  .bar-chart-wrap{padding:6px 0 2px}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .bar-row-label{font-size:.67rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:140px;max-width:160px}
+  .bar-row-track{flex:1;height:22px;background:var(--surface3);border-radius:3px;overflow:hidden}
+  .bar-row-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-right:8px;
+    justify-content:flex-end;transition:width .9s cubic-bezier(.4,0,.2,1)}
+  .bar-row-val{font-family:var(--font-display);font-size:.72rem;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap}
+  .bar-row-pct{font-size:.64rem;color:var(--text3);min-width:40px;text-align:right}
+
+  /* ALERT DOT */
+  .alert-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;box-shadow:0 0 6px var(--red)}
+  .alert-dot.orange{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+
+  /* SEARCH */
+  .search-wrap{position:relative;margin-bottom:10px}
+  .search-input{width:100%;background:var(--surface2);border:1px solid var(--border);
+    border-radius:6px;color:var(--text);font-family:var(--font-body);font-size:.78rem;
+    padding:6px 12px 6px 30px;outline:none;transition:border-color .2s}
+  .search-input:focus{border-color:var(--blue)}
+  .search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.78rem;pointer-events:none}
+
+  /* SCROLL TABLE */
+  .table-scroll{max-height:400px;overflow-y:auto}
+  .table-scroll::-webkit-scrollbar{width:4px}
+  .table-scroll::-webkit-scrollbar-track{background:var(--surface)}
+  .table-scroll::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+  /* TABS */
+  .tabs{display:flex;gap:2px;background:var(--surface2);border-radius:6px;padding:3px;margin-bottom:10px}
+  .tab{flex:1;text-align:center;padding:5px 6px;font-size:.63rem;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-radius:4px;cursor:pointer;transition:all .2s}
+  .tab.active{background:var(--surface3);color:var(--text)}
+
+  /* EMPTY STATE */
+  .empty-state{text-align:center;padding:32px;color:var(--text3);font-size:.8rem}
+
+  /* SORTABLE */
+  .sortable{cursor:pointer;user-select:none}
+  .sortable:hover{color:var(--text2)}
+  .sort-arrow{margin-left:3px;opacity:.5}
+
+  /* RESPONSIVE */
+  @media(max-width:1100px){
+    .kpi-grid{grid-template-columns:repeat(3,1fr)}
+    .grid-2,.grid-3{grid-template-columns:1fr}
+    .tipo-grid{grid-template-columns:repeat(3,1fr)}
+  }
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .35s ease forwards}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="bmw-logo"></div>
+    <div>
+      <div class="header-subtitle">Análise de Produtos Agregados — Automob 2026</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-live" id="badgePeriod">● Jan – Mai 2026</span>
+    <span class="header-period">Grupo Automob</span>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Alternar modo claro/escuro">
+      <div class="theme-knob" id="themeKnob">🌙</div>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- MÊS FILTER -->
+  <div class="filter-strip" style="margin-bottom:8px">
+    <span class="filter-strip-title">📅 Mês:</span>
+    <button class="mes-btn active" onclick="setMes(0)" id="mes-btn-0">Todos</button>
+    <button class="mes-btn" onclick="setMes(1)" id="mes-btn-1">Jan</button>
+    <button class="mes-btn" onclick="setMes(2)" id="mes-btn-2">Fev</button>
+    <button class="mes-btn" onclick="setMes(3)" id="mes-btn-3">Mar</button>
+    <button class="mes-btn" onclick="setMes(4)" id="mes-btn-4">Abr</button>
+    <button class="mes-btn" onclick="setMes(5)" id="mes-btn-5">Mai</button>
+  </div>
+
+  <!-- PRODUTO FILTER -->
+  <div class="filter-strip" style="margin-bottom:20px">
+    <span class="filter-strip-title">🏷️ Produto:</span>
+    <button class="prod-btn active-ALL" onclick="setProd('ALL')" id="prod-btn-ALL">
+      <span class="prod-dot" style="background:var(--text3)"></span>Todos
+    </button>
+    <button class="prod-btn" onclick="setProd('ppi')" id="prod-btn-ppi">
+      <span class="prod-dot" style="background:#0066CC"></span>PPI
+    </button>
+    <button class="prod-btn" onclick="setProd('acessorios')" id="prod-btn-acessorios">
+      <span class="prod-dot" style="background:#22c97e"></span>Acessórios
+    </button>
+    <button class="prod-btn" onclick="setProd('blindagem')" id="prod-btn-blindagem">
+      <span class="prod-dot" style="background:#c8a84b"></span>Blindagem
+    </button>
+    <button class="prod-btn" onclick="setProd('manutencao')" id="prod-btn-manutencao">
+      <span class="prod-dot" style="background:#f07630"></span>Plano Manut.
+    </button>
+    <button class="prod-btn" onclick="setProd('garantia')" id="prod-btn-garantia">
+      <span class="prod-dot" style="background:#a04ee8"></span>Garantia Ext.
+    </button>
+  </div>
+
+  <!-- MARCA FILTER -->
+  <div class="filter-strip" style="margin-bottom:20px">
+    <span class="filter-strip-title">🚗 Marca:</span>
+    <button class="marca-btn active" onclick="setMarca('ALL')" id="marca-btn-ALL">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block"></span>Todas
+    </button>
+    <button class="marca-btn" onclick="setMarca('BMW')" id="marca-btn-BMW">
+      <span style="width:8px;height:8px;border-radius:50%;background:#0066CC;display:inline-block"></span>BMW
+    </button>
+    <button class="marca-btn" onclick="setMarca('MOTORRAD')" id="marca-btn-MOTORRAD">
+      <span style="width:8px;height:8px;border-radius:50%;background:#e84040;display:inline-block"></span>Motorrad
+    </button>
+    <button class="marca-btn" onclick="setMarca('MINI')" id="marca-btn-MINI">
+      <span style="width:8px;height:8px;border-radius:50%;background:#c8a84b;display:inline-block"></span>MINI
+    </button>
+    <button class="marca-btn" onclick="setMarca('OUTROS')" id="marca-btn-OUTROS">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block"></span>Outros
+    </button>
+  </div>
+  <div class="section-label">Visão Geral</div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- TIPOS -->
+  <div class="section-label">Quantidade por Tipo de Agregado</div>
+  <div class="tipo-grid" id="tipoGrid"></div>
+
+  <!-- LOJAS + TREND -->
+  <div class="section-label">Performance por Ponto de Venda</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Ranking — Ponto de Venda</div>
+        <div class="card-meta">Por quantidade de produtos</div>
+      </div>
+      <div style="padding:0">
+        <div class="table-scroll">
+          <table class="rank-table">
+            <thead>
+              <tr>
+                <th style="padding-left:16px">#</th>
+                <th>Loja</th>
+                <th class="right">Contratos</th>
+                <th class="right">Penetração</th>
+                <th class="right">Qtd. Produtos</th>
+              </tr>
+            </thead>
+            <tbody id="lojaBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Tendência Mensal</div>
+          <div class="card-meta">Qtd. produtos agregados</div>
+        </div>
+        <div class="card-body">
+          <div class="trend-row" id="trendChart"></div>
+          <div style="display:flex;gap:4px;margin-top:6px" id="trendLabels"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Mix por Tipo</div>
+          <div class="card-meta">% do total de produtos</div>
+        </div>
+        <div class="card-body" style="padding:8px 14px">
+          <div class="donut-container" id="donutArea"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENDEDORES -->
+  <div class="section-label">Performance por Vendedor</div>
+  <div class="filter-bar" id="lojaFilters"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏆 Top Vendedores</div>
+        <div class="card-meta" id="topCount"></div>
+      </div>
+      <div class="card-body" style="padding:10px 12px">
+        <div class="tabs">
+          <div class="tab active" data-key="total_qtd" data-side="top">Ordenar: Qtd. Produto</div>
+          <div class="tab" data-key="penetracao_pct" data-side="top">Ordenar: Penetração</div>
+          <div class="tab" data-key="total_cttos" data-side="top">Ordenar: Contratos</div>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="searchTop" placeholder="Buscar vendedor..." oninput="renderVendedores()">
+        </div>
+        <div class="table-scroll">
+          <table class="rank-table">
+            <thead><tr>
+              <th>#</th>
+              <th>Vendedor</th>
+              <th class="right">Contratos</th>
+              <th class="right">Qtd. Produto</th>
+              <th class="right">Penetração</th>
+            </tr></thead>
+            <tbody id="topBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⚠️ Atenção — Baixa Performance</div>
+        <div class="card-meta">Mín. 3 contratos</div>
+      </div>
+      <div class="card-body" style="padding:10px 12px">
+        <div class="tabs">
+          <div class="tab active" data-key="total_qtd" data-side="bot">Ordenar: Qtd. Produto</div>
+          <div class="tab" data-key="penetracao_pct" data-side="bot">Ordenar: Penetração</div>
+          <div class="tab" data-key="total_cttos" data-side="bot">Ordenar: Contratos</div>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="searchBot" placeholder="Buscar vendedor..." oninput="renderVendedores()">
+        </div>
+        <div class="table-scroll">
+          <table class="rank-table">
+            <thead><tr>
+              <th>#</th>
+              <th>Vendedor</th>
+              <th class="right">Contratos</th>
+              <th class="right">Qtd. Produto</th>
+              <th class="right">Penetração</th>
+            </tr></thead>
+            <tbody id="botBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+// ── RAW DATA ─────────────────────────────────────────────────────────────────
+const RAW_DATA = 
+[{"mes":1,"contrato":2026000180,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":12000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020699,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":623.59,"acessorios":1990.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020658,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020749,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020745,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":1670.14,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000335,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000058,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020821,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020819,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000354,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1747.28,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020852,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020873,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":890.74,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020702,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":1679.77,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000449,"loja":"Euro Import_Curitiba","vendedor":"RICARDO TRIDA LUCIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000618,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000630,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000027,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000528,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":635.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000559,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":3814.81,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000060,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":3060.01,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000064,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":1520.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000103,"loja":"Autostar_Morumbi","vendedor":"KELEN CRISTINA ALCARA","marca":"BMW","ppi":2843.91,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000750,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":685.12,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000135,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":5247.42,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000158,"loja":"Euro Import_Curitiba","vendedor":"RICARDO TRIDA LUCIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000116,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1324.07,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000081,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000117,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":238.33,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000653,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000758,"loja":"Euro Import_Curitiba","vendedor":"CAROLINE JOAKIMSON","marca":"BMW","ppi":2973.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000731,"loja":"Euro Import_Joinville","vendedor":"YURI ROÇANEZI FIDELIS","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000093,"loja":"Autostar_Jardins","vendedor":"ALYSSON RAMON SINEZIO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":1,"contrato":2026000146,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":3042.99,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000781,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6307,"garantia":5551.64},{"mes":1,"contrato":2026000141,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000178,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":0.0,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000179,"loja":"Euro Import_Cascavel","vendedor":"KASSYA EDUARDA FABRICIO CAMARGO","marca":"BMW","ppi":2843.91,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":1,"contrato":2026000194,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":1,"contrato":2026000249,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":3599.94,"acessorios":2990.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000514,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000419,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":4284.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000210,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1552.35,"acessorios":23575.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000222,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000379,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":687.21,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000796,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":13791.81},{"mes":1,"contrato":2026000238,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020659,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":0.0,"acessorios":14668.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000913,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000930,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000613,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1000.06,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000679,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":3932.22,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020292,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020046,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2025020056,"loja":"Autostar_Vila Olímpia","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":1356.53,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000353,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000423,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000248,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":2915.58,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000342,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000550,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":1452.1,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000416,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":923.26,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000511,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":1622.89,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000602,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":1456.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001000,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000587,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6216,"garantia":3883.22},{"mes":1,"contrato":2026000620,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":906.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000761,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000835,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":3520.06,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000659,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":460.64,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001165,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000686,"loja":"Autostar_Morumbi","vendedor":"ALESSANDRA MORAIS RODRIGUES","marca":"BMW","ppi":2889.37,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000692,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":7384.45,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000928,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000872,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":2837.36,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000716,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1254.83,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000718,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000851,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":2761.52,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000744,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":2104.56,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000735,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":1357.3,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000760,"loja":"Euro Import_Londrina","vendedor":"Higor Marcusso Bonfim","marca":"BMW","ppi":0.0,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000958,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1106.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000774,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":919.61,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000279,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":2928.37,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001049,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1060.81,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000780,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001115,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":880.6,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000777,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1877.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000792,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":300.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000956,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":1675.12,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000824,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":5180.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001065,"loja":"Euro Import_Curitiba","vendedor":"CARLOS JOSE DOS SANTOS VALADAO","marca":"BMW","ppi":2497.73,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000685,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000813,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":408.3,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000858,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":1319.53,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001074,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1104.85,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001090,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000828,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":2893.3,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001126,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":1842.82,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000402,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000847,"loja":"Autostar_Morumbi","vendedor":"Clayson Cardoso Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001086,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":933.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000876,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":878.8,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000370,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000995,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":694.84,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000471,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000494,"loja":"Autostar_Jardins","vendedor":"HELETEIA CRISTINA DE PAULA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000670,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":574.49,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000506,"loja":"Autostar_Morumbi","vendedor":"Silvio Cesar Valerio","marca":"BMW","ppi":870.18,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000534,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":271.13,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001003,"loja":"Autostar_Jardins","vendedor":"HELETEIA CRISTINA DE PAULA","marca":"BMW","ppi":2740.58,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000946,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":2718.73,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000661,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000882,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":1,"contrato":2026000965,"loja":"Autostar_Morumbi","vendedor":"RODRIGO VICENTE DA SILVA","marca":"MINI","ppi":1000.24,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000624,"loja":"Autostar_Jardins","vendedor":"HELETEIA CRISTINA DE PAULA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000979,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":3017.48,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000991,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":1022.13,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001015,"loja":"Euro Import_Londrina","vendedor":"BRUNO CESAR PRECINOTTO","marca":"BMW","ppi":0.0,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000672,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1307.2,"acessorios":7500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000992,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000817,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":635.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001083,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001257,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001218,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1570.88,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001013,"loja":"Autostar_Morumbi","vendedor":"DIEGO DE SOUZA ANDRADE MARTINEZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001132,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":829.59,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001170,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":4557.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001221,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1306.34,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001233,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":1145.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026000974,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":1,"contrato":2026000940,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001025,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":0.0,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":1,"contrato":2026001276,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":1301.6,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001261,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":2951.12,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001277,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":10170.21,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026001348,"loja":"Euro Import_Londrina","vendedor":"Higor Marcusso Bonfim","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001270,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1753.33,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001353,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":688.15,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001267,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1083.56,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001211,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":1692.1,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001271,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001199,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":2303.4,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001269,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1455.61,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001404,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001351,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":2709.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001174,"loja":"Euro Import_Curitiba","vendedor":"RICARDO TRIDA LUCIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001392,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001394,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":2375.22,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001374,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1371.52,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001437,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001222,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":1832.48,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001381,"loja":"Autostar_Jardins","vendedor":"HELETEIA CRISTINA DE PAULA","marca":"BMW","ppi":2737.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001443,"loja":"Autostar_Jardins","vendedor":"PETERSON SILVA SAFFIOTTE CORREA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026001440,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":6351.31,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001313,"loja":"Euro Import_Cascavel","vendedor":"KASSYA EDUARDA FABRICIO CAMARGO","marca":"BMW","ppi":5976.67,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001259,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":2,"contrato":2026001396,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001383,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026000927,"loja":"Autostar_Morumbi","vendedor":"RODRIGO VICENTE DA SILVA","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":2,"contrato":2026001303,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":969.52,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001439,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1006.54,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001144,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":3594.73,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001454,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001434,"loja":"Euro Import_Curitiba","vendedor":"CLAUDIA CRISTINA NORATO","marca":"MINI","ppi":1524.96,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":2,"contrato":2026001317,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11022.65},{"mes":2,"contrato":2026001384,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"MINI","ppi":3865.47,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001318,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001352,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001322,"loja":"Autostar_Morumbi","vendedor":"Marcelo Humet","marca":"BMW","ppi":314.65,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001122,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":152000,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001427,"loja":"Autostar_Morumbi","vendedor":"KELEN CRISTINA ALCARA","marca":"BMW","ppi":1266.29,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001453,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":2562.05,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":2,"contrato":2026001390,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1482.72,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001573,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":894.68,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001537,"loja":"Euro Import_Londrina","vendedor":"BRUNO CESAR PRECINOTTO","marca":"BMW","ppi":1802.15,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001430,"loja":"Euro Import_Curitiba","vendedor":"KAUE RICARDO BARBOZA BAASCH","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001431,"loja":"Euro Import_Joinville","vendedor":"YURI ROÇANEZI FIDELIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001609,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":2968.56,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":2,"contrato":2026001612,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":1232.45,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001409,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001631,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":1410.2,"acessorios":13940.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001483,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001637,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":307.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001625,"loja":"Euro Import_Cascavel","vendedor":"KASSYA EDUARDA FABRICIO CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001684,"loja":"Euro Import_Cascavel","vendedor":"ANA PAULA FEIDEN","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001661,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001627,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":2751.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001585,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":3104.69,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":2,"contrato":2026001697,"loja":"Euro Import_Londrina","vendedor":"BRUNO CESAR PRECINOTTO","marca":"BMW","ppi":2471.44,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001629,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":2305.54,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001675,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1975.58,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001737,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":594.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001666,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001424,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":2767.26,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001723,"loja":"Autostar_Jardins","vendedor":"PETERSON SILVA SAFFIOTTE CORREA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001701,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":913.4,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001700,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":1106.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026000966,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":1357.45,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001104,"loja":"Autostar_Morumbi","vendedor":"KELEN CRISTINA ALCARA","marca":"BMW","ppi":2767.41,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001783,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001689,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001681,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":856.95,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001552,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":4166.76,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001771,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":5062.32,"acessorios":11400.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001809,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":891.31,"acessorios":10990.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001668,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":9119.59,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001865,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":2,"contrato":2026001765,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":1903.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001817,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":822.86,"acessorios":16000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001813,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":0.0,"acessorios":13940.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001914,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001868,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":885.43,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001922,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":688.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001870,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001903,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":2954.52,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001936,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":922.22,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001897,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":0.0,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001969,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001978,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":6871.1,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002000,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":254.17,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001984,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":1404.96,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001976,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":3799.62,"acessorios":0.0,"blindagem":0,"manutencao":6772,"garantia":0.0},{"mes":2,"contrato":2026001973,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":582.07,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001636,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":1217.9,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002058,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":390.15,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001864,"loja":"Euro Import_Londrina","vendedor":"ANA MARIA PARIETTI MIGLIORINI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002014,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":899.56,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002007,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":4887.01,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026001791,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":2500.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026002031,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001942,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":2270.66,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001963,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":2836.33,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002061,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":968.48,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001820,"loja":"Euro Import_Curitiba","vendedor":"THIAGO PEREIRA RODRIGUES DOS SANTOS","marca":"MINI","ppi":1850.93,"acessorios":0.0,"blindagem":0,"manutencao":6873,"garantia":0.0},{"mes":2,"contrato":2026001646,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001951,"loja":"Autostar_Jardins","vendedor":"IRINEU ALVES DE SALES","marca":"BMW","ppi":1903.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001923,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002126,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":289.05,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002132,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002151,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002068,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":2251.03,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002131,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002116,"loja":"Autostar_Morumbi","vendedor":"ALESSANDRA MORAIS RODRIGUES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026002129,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":656.79,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002150,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1453.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002147,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":4947.27,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026001705,"loja":"Autostar_Morumbi","vendedor":"RODRIGO VICENTE DA SILVA","marca":"MINI","ppi":2131.02,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002184,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002078,"loja":"Autostar_Jardins","vendedor":"HELETEIA CRISTINA DE PAULA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026002130,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":2199.08,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002157,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":900.6,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002203,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":884.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001974,"loja":"Euro Import_Joinville","vendedor":"MIRIANE DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":2,"contrato":2026002179,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1136.65,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002232,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001944,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":1991.22,"acessorios":690.0,"blindagem":0,"manutencao":0,"garantia":12731.89},{"mes":2,"contrato":2026002159,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":1089.87,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002210,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002188,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":6941.97,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002244,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":3159.68,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026001960,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":3446.8,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002249,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":4804.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002202,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":162600.0,"blindagem":0,"manutencao":0,"garantia":13791.81},{"mes":2,"contrato":2026002305,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":1922.41,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002259,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1098.45,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002213,"loja":"Euro Import_Curitiba","vendedor":"RICARDO ANDRÉ ZANLORENZI","marca":"BMW","ppi":1017.2,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002365,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":2306.23,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002313,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":2,"contrato":2026002217,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002378,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1106.03,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002455,"loja":"Euro Import_Cascavel","vendedor":"KASSYA EDUARDA FABRICIO CAMARGO","marca":"BMW","ppi":9628.36,"acessorios":500.0,"blindagem":0,"manutencao":5863,"garantia":7906.43},{"mes":2,"contrato":2026002390,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":4012.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002499,"loja":"Euro Import_Curitiba","vendedor":"CLAUDIA CRISTINA NORATO","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002404,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1090.2,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002071,"loja":"Euro Import_Curitiba","vendedor":"RICARDO TRIDA LUCIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002286,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":160000,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002476,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1021.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002320,"loja":"Autostar_Jardins","vendedor":"ALYSSON RAMON SINEZIO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002328,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1248.23,"acessorios":17934.95,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002323,"loja":"Autostar_Jardins","vendedor":"PETERSON SILVA SAFFIOTTE CORREA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11022.65},{"mes":2,"contrato":2026002537,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":690.86,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002505,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1106.03,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002522,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002573,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":521.52,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002538,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002557,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":2,"contrato":2026002381,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":16042.19},{"mes":2,"contrato":2026002382,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":3746.41,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002457,"loja":"Euro Import_Cascavel","vendedor":"KASSYA EDUARDA FABRICIO CAMARGO","marca":"BMW","ppi":2713.42,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":2,"contrato":2026002601,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1217.19,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002283,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":612.04,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002504,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":267.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002528,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002606,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002451,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":673.67,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002628,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":806.05,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002563,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":0.0,"acessorios":6775.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002531,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":861.45,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002622,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":846.8,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002737,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":11022.65},{"mes":2,"contrato":2026002549,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":2751.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002587,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":2884.3,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":2,"contrato":2026002542,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":2989.56,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":2,"contrato":2026002751,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":948.12,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002569,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":651.28,"acessorios":18990.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002732,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002339,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002643,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":0.0,"acessorios":690.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002684,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002685,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":0.0,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":2,"contrato":2026002731,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":3159.72,"acessorios":3800.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":3,"contrato":2026002118,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":1927.65,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002823,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1081.67,"acessorios":7550.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002838,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":885.24,"acessorios":9990.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002762,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":3,"contrato":2026002805,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002576,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":3353.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002856,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":7662.55,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":3,"contrato":2026002755,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":2857.33,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026002375,"loja":"Autostar_Morumbi","vendedor":"MILENA SANTOS DE ABREU","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002839,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"MINI","ppi":2467.59,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":3,"contrato":2026002693,"loja":"Euro Import_Curitiba","vendedor":"CLAUDIA CRISTINA NORATO","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":3,"contrato":2026002881,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002104,"loja":"Euro Import_Curitiba","vendedor":"THIAGO PEREIRA RODRIGUES DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002897,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":3,"contrato":2026002923,"loja":"Autostar_Jardins","vendedor":"ALYSSON RAMON SINEZIO DA SILVA","marca":"BMW","ppi":3011.83,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026002807,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":1776.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002947,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026002956,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":1273.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002586,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":3,"contrato":2026002816,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":2989.46,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002747,"loja":"Autostar_Morumbi","vendedor":"Marcelo Humet","marca":"MINI","ppi":1547.05,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002830,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":2059.51,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026002577,"loja":"Autostar_Morumbi","vendedor":"ALESSANDRA MORAIS RODRIGUES","marca":"BMW","ppi":2570.13,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002555,"loja":"Autostar_Morumbi","vendedor":"DIEGO DE SOUZA ANDRADE MARTINEZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002980,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002988,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026002857,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003066,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002714,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003064,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":862.68,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002972,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":461.39,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003102,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003061,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":3,"contrato":2026002610,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002712,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":1071.15,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003118,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":591.32,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003115,"loja":"Euro Import_Joinville","vendedor":"Pedro Henrique Petry","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003045,"loja":"Euro Import_Londrina","vendedor":"Rodrigo Felix Pereira","marca":"BMW","ppi":0.0,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003154,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":2840.12,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002973,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003053,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":1254.2,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003126,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":860.78,"acessorios":6600.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003224,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":2752.07,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003230,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":5224.21,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026003092,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":3092.17,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026003111,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003188,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003301,"loja":"Euro Import_Curitiba","vendedor":"CARLOS JOSE DOS SANTOS VALADAO","marca":"BMW","ppi":4157.55,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003391,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":3711.42,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003395,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026003339,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":422.44,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003125,"loja":"Euro Import_Cascavel","vendedor":"ANA PAULA FEIDEN","marca":"BMW","ppi":1357.3,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003323,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":2750.89,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003433,"loja":"Euro Import_Curitiba","vendedor":"Janaina Leticia dos Santos","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003386,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003377,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7906.43},{"mes":3,"contrato":2026003369,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003405,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1204.62,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003537,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003459,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":1911.64,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003315,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":573.45,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003381,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003328,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":1737.68,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003331,"loja":"Autostar_Morumbi","vendedor":"Silvio Cesar Valerio","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003370,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003347,"loja":"Euro Import_Londrina","vendedor":"Rodrigo Felix Pereira","marca":"BMW","ppi":4341.09,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003310,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":5280.89,"acessorios":690.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026003432,"loja":"Euro Import_Curitiba","vendedor":"CAROLINE JOAKIMSON","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":3,"contrato":2026003586,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":2884.3,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026003604,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":2856.43,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026003528,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":2698.48,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003545,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003434,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":4316.24,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003649,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":2349.06,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003639,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003389,"loja":"Euro Import_Curitiba","vendedor":"RICARDO TRIDA LUCIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003650,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":743.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003711,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1165.44,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003385,"loja":"Euro Import_Curitiba","vendedor":"Janaina Leticia dos Santos","marca":"BMW","ppi":4725.78,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003645,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":324.14,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003556,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003609,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":1683.56,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003682,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":868.32,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003684,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003671,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":2789.99,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003712,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":218.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003756,"loja":"Euro Import_Joinville","vendedor":"KLAUS WILLIAN DE MEDEIROS KOSTER","marca":"MOTORRAD","ppi":444.19,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003274,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003495,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":688.91,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003681,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1617.53,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003771,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003800,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1457.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003816,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6671,"garantia":0.0},{"mes":3,"contrato":2026003598,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003670,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":594.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003809,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":149.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026002602,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":2751.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003685,"loja":"Euro Import_Curitiba","vendedor":"Janaina Leticia dos Santos","marca":"BMW","ppi":4354.16,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003687,"loja":"Euro Import_Curitiba","vendedor":"CLAUMIR ZANCHI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003857,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":1595.96,"acessorios":3825.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003824,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1135.62,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003853,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":775.11,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003912,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":2698.96,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003175,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003806,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003879,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003856,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":4253.6,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003742,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":2751.04,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003474,"loja":"Euro Import_Curitiba","vendedor":"RICARDO TRIDA LUCIO","marca":"BMW","ppi":1699.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003852,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004025,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":4095.54,"acessorios":2500.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":3,"contrato":2026003987,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":877.48,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004033,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":3,"contrato":2026003983,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":1379.03,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004017,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004117,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":1736.28,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":3,"contrato":2026004023,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":2032.96,"acessorios":3500.0,"blindagem":0,"manutencao":12128,"garantia":0.0},{"mes":3,"contrato":2026003595,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":1390.84,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004185,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":949.06,"acessorios":9705.9,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003991,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004141,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003891,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":885.43,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004139,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":7390.72,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7906.43},{"mes":3,"contrato":2026004130,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004135,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":2305.45,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004077,"loja":"Euro Import_Londrina","vendedor":"Rodrigo Felix Pereira","marca":"BMW","ppi":2546.24,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004240,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003993,"loja":"Euro Import_Cascavel","vendedor":"ANA PAULA FEIDEN","marca":"BMW","ppi":2942.16,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026004293,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":1295.73,"acessorios":2990.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004071,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":1259.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004265,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004281,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":1142.77,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004178,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":368.77,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004280,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":1737.68,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003964,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004341,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":3119.14,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026004384,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":2943.45,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026004372,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":0.0,"acessorios":690.0,"blindagem":0,"manutencao":0,"garantia":24505.48},{"mes":3,"contrato":2026004162,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":906.39,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003910,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":11022.65},{"mes":3,"contrato":2026004142,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":2168.08,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003740,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":9434.97,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004101,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":2523.4,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004068,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004169,"loja":"Autostar_Morumbi","vendedor":"Clayson Cardoso Miranda","marca":"BMW","ppi":2723.29,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004163,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004288,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":577.62,"acessorios":13815.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004297,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004326,"loja":"Euro Import_Londrina","vendedor":"AQUILAS LOMBARDI E LIMA","marca":"MOTORRAD","ppi":1439.92,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003572,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004012,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":29028.19},{"mes":3,"contrato":2026004544,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":8511.11,"acessorios":0.0,"blindagem":0,"manutencao":7479,"garantia":0.0},{"mes":3,"contrato":2026003329,"loja":"Autostar_Morumbi","vendedor":"Clayson Cardoso Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004318,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":869.03,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004499,"loja":"Euro Import_Joinville","vendedor":"Pedro Henrique Petry","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003950,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004472,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":1485.52,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004234,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":1317.72,"acessorios":8000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004390,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":407.45,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004342,"loja":"Autostar_Morumbi","vendedor":"MILENA SANTOS DE ABREU","marca":"MINI","ppi":3957.45,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":3,"contrato":2026004357,"loja":"Autostar_Jardins","vendedor":"ALYSSON RAMON SINEZIO DA SILVA","marca":"BMW","ppi":2760.49,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004402,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004333,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004425,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":2724.17,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004447,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004486,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004209,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":2381.29,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004515,"loja":"Euro Import_Londrina","vendedor":"Rodrigo Felix Pereira","marca":"BMW","ppi":3874.22,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004617,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":149.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004616,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":3181.03,"acessorios":6000.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":3,"contrato":2026004582,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":1563.91,"acessorios":7370.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":3,"contrato":2026004317,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":2247.73,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":3,"contrato":2026004314,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":2247.73,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":3,"contrato":2026003767,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":1030.19,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003900,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004647,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":2187.04,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004153,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004464,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":312.84,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004435,"loja":"Autostar_Morumbi","vendedor":"Silvio Cesar Valerio","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004525,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":0.0,"acessorios":16400.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004606,"loja":"Euro Import_Joinville","vendedor":"Andrey Henrique kmiecik","marca":"MOTORRAD","ppi":307.11,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004597,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004485,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004552,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":2752.07,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004704,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":1349.38,"acessorios":690.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004555,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":1162.96,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004698,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":436.84,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004611,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":1495.98,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026003710,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":2889.37,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004455,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004677,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":2786.57,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004686,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":3124.61,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004417,"loja":"Autostar_Morumbi","vendedor":"RODRIGO VICENTE DA SILVA","marca":"MINI","ppi":1683.56,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004586,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":423.47,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":3,"contrato":2026004618,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":12825.85,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004454,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":10590.0,"blindagem":0,"manutencao":0,"garantia":7301.1},{"mes":4,"contrato":2026004166,"loja":"Euro Import_Joinville","vendedor":"RONALDO RUDOLFO ADRATT JUNIOR","marca":"BMW","ppi":3253.3,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004328,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004764,"loja":"Euro Import_Joinville","vendedor":"Andrey Henrique kmiecik","marca":"MOTORRAD","ppi":1195.95,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004775,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004553,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":0.0,"acessorios":10600.0,"blindagem":0,"manutencao":0,"garantia":11922.05},{"mes":4,"contrato":2026004744,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1227.11,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":3786.07},{"mes":4,"contrato":2026004785,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":4677.43,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004786,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004644,"loja":"Euro Import_Londrina","vendedor":"Rodrigo Felix Pereira","marca":"BMW","ppi":0.0,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004742,"loja":"Euro Import_Londrina","vendedor":"AQUILAS LOMBARDI E LIMA","marca":"MOTORRAD","ppi":518.27,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004432,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":1813.61,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004461,"loja":"Autostar_Morumbi","vendedor":"KELEN CRISTINA ALCARA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004667,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1032.14,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004726,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004658,"loja":"Euro Import_Joinville","vendedor":"KLAUS WILLIAN DE MEDEIROS KOSTER","marca":"MOTORRAD","ppi":461.44,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004558,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":2752.07,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004600,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":0.0,"acessorios":9360.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":4,"contrato":2026004639,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004642,"loja":"Autostar_Jardins","vendedor":"KARINA ANGELO FRANCISCO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004666,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":2494.9,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004637,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004732,"loja":"Autostar_Jardins","vendedor":"TAYRA COUTINHO FERNANDES","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004812,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004789,"loja":"Euro Import_Curitiba","vendedor":"JULIANE CAROLINE DE ASSIS","marca":"BMW","ppi":3585.37,"acessorios":0.0,"blindagem":0,"manutencao":6772,"garantia":0.0},{"mes":4,"contrato":2026004614,"loja":"Autostar_Jardins","vendedor":"ALYSSON RAMON SINEZIO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004493,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004386,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":1767.51,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":4,"contrato":2026003164,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":592.22,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004537,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":4884.66,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004809,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":2810.19,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004776,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1570.46,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004653,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004724,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":2859.08,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004817,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004740,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":978.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004770,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004822,"loja":"Autostar_Vila Olímpia","vendedor":"ANDRE JESUINO PIRES DE OLIVEIRA","marca":"BMW","ppi":3298.95,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004868,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":897.52,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004887,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004879,"loja":"Euro Import_Joinville","vendedor":"KLAUS WILLIAN DE MEDEIROS KOSTER","marca":"MOTORRAD","ppi":307.67,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004909,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":616.2,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004931,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":222.78,"acessorios":2400.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004156,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":0.0,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004870,"loja":"Autostar_Jardins","vendedor":"KARINA ANGELO FRANCISCO","marca":"BMW","ppi":2699.82,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004912,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":1131.9,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004873,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":160000,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004693,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005012,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004943,"loja":"Euro Import_Curitiba","vendedor":"CAROLINE JOAKIMSON","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004940,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":300.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005034,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004523,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004953,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":1453.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005067,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005080,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":589.28,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005050,"loja":"Autostar_Jardins","vendedor":"IRINEU ALVES DE SALES","marca":"BMW","ppi":3329.29,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004979,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":2683.79,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005084,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005088,"loja":"Euro Import_Londrina","vendedor":"AQUILAS LOMBARDI E LIMA","marca":"MOTORRAD","ppi":1029.8,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005090,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":305.97,"acessorios":300.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005000,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005075,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":2737.9,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005081,"loja":"Euro Import_Londrina","vendedor":"AQUILAS LOMBARDI E LIMA","marca":"MOTORRAD","ppi":765.98,"acessorios":10900.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005108,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":2517.89,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005136,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":931.6,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005065,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":856.71,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005129,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005134,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1014.36,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005190,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":4483.47,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005241,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":2339.38,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005123,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":3138.35,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004932,"loja":"Euro Import_Curitiba","vendedor":"ANDERSON UBIRAJARA OLESKOWICZ","marca":"BMW","ppi":2564.37,"acessorios":12500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004936,"loja":"Euro Import_Curitiba","vendedor":"CAROLINE JOAKIMSON","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":4,"contrato":2026005153,"loja":"Autostar_Jardins","vendedor":"ALYSSON RAMON SINEZIO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005167,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":4660.79,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":4,"contrato":2026005282,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":536.47,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004436,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":2373.7,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005135,"loja":"Autostar_Jardins","vendedor":"HELETEIA CRISTINA DE PAULA","marca":"BMW","ppi":3299.44,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":4,"contrato":2026005262,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":2925.02,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005342,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":0.0,"acessorios":23423.9,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005330,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":2178.37,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005180,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":989.78,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005276,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":7906.43},{"mes":4,"contrato":2026005247,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":2153.77,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005368,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":5697.95,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005355,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":12707.94,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005332,"loja":"Autostar_Morumbi","vendedor":"MILENA SANTOS DE ABREU","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005372,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1269.94,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026003163,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":1888.33,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004926,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005290,"loja":"Euro Import_Joinville","vendedor":"MIRIANE DOS SANTOS","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005323,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005319,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":3442.92,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005407,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":2130.16,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005447,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005354,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":705.98,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005278,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":4311.15,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005419,"loja":"Euro Import_Londrina","vendedor":"Andrey Henrique Silva dos Santos","marca":"BMW","ppi":3991.55,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005253,"loja":"Autostar_Morumbi","vendedor":"JOEL FRANCISCO DE ARAUJO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026004890,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005248,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005495,"loja":"Euro Import_Joinville","vendedor":"KLAUS WILLIAN DE MEDEIROS KOSTER","marca":"MOTORRAD","ppi":444.19,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005484,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":2884.3,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":4,"contrato":2026005452,"loja":"Autostar_Morumbi","vendedor":"IAGO CAUA LIMA SAMPAIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005541,"loja":"Euro Import_Cascavel","vendedor":"Lucas Fernando Batista da Silva","marca":"BMW","ppi":2838.37,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005485,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":2890.93,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005516,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":5426.2,"acessorios":2500.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":4,"contrato":2026005547,"loja":"Euro Import_Londrina","vendedor":"Rodrigo Felix Pereira","marca":"BMW","ppi":2168.08,"acessorios":700.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005557,"loja":"Autostar_Morumbi","vendedor":"DAYANE CRISTINA ALVES DE ALMEIDA","marca":"MINI","ppi":6198.71,"acessorios":0.0,"blindagem":0,"manutencao":7479,"garantia":0.0},{"mes":4,"contrato":2026005532,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":2867.32,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005602,"loja":"Euro Import_Londrina","vendedor":"KAUAN BARBOSA ARANTES","marca":"MOTORRAD","ppi":765.11,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":3073.38},{"mes":4,"contrato":2026005464,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":2723.13,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005519,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1150.87,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005641,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":1630.68,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005622,"loja":"Autostar_Morumbi","vendedor":"MOISES BRUSTOLIN","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":7479,"garantia":0.0},{"mes":4,"contrato":2026005660,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":2826.39,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005505,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":6671,"garantia":0.0},{"mes":4,"contrato":2026005569,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005733,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005523,"loja":"Euro Import_Londrina","vendedor":"ANA MARIA PARIETTI MIGLIORINI","marca":"BMW","ppi":0.0,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005685,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":878.51,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005698,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005735,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":2988.66,"acessorios":0.0,"blindagem":0,"manutencao":6974,"garantia":5551.64},{"mes":4,"contrato":2026005480,"loja":"Autostar_Jardins","vendedor":"TATIANE DE JESUS COLY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005689,"loja":"Euro Import_Curitiba","vendedor":"LETICIA LEMES CAETANO CARLON DOS SANTOS","marca":"BMW","ppi":2510.87,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005605,"loja":"Autostar_Morumbi","vendedor":"Marcelo Humet","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005742,"loja":"Autostar_Jardins","vendedor":"FERNANDO DIAS MOREIRA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005707,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":4939.94,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005872,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":1431.6,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005842,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":3122.36,"acessorios":1500.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":4,"contrato":2026003788,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":938.52,"acessorios":10000.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005732,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005794,"loja":"Euro Import_Londrina","vendedor":"ANDREIA CAETANO DUARTE","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005820,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1160.07,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005751,"loja":"Euro Import_Curitiba","vendedor":"CAROLINE JOAKIMSON","marca":"BMW","ppi":2790.94,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":5551.64},{"mes":4,"contrato":2026004774,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005406,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":516.38,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005866,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":627.48,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005881,"loja":"Euro Import_Joinville","vendedor":"RICARDO JAISON COELHO","marca":"MOTORRAD","ppi":802.72,"acessorios":800.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005941,"loja":"Euro Import_Joinville","vendedor":"Andrey Henrique kmiecik","marca":"MOTORRAD","ppi":305.97,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005837,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1906.43,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005848,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":572.31,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005939,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":445.56,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005950,"loja":"Euro Import_Curitiba","vendedor":"ELIANE FERREIRA DOS SANTOS CARRARO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":24505.48},{"mes":4,"contrato":2026005859,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":5980.8,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005560,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":1106.03,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005772,"loja":"Autostar_Morumbi","vendedor":"VINICIUS PASCUAL MILITAO","marca":"BMW","ppi":4567.33,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005875,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":1699.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005980,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005996,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":293.88,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005907,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1188.79,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005914,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1187.76,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006034,"loja":"Euro Import_Curitiba","vendedor":"DAYANE APARECIDA MACIEL","marca":"BMW","ppi":2872.74,"acessorios":690.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":4,"contrato":2026005713,"loja":"Autostar_Morumbi","vendedor":"EDUARDO PEREIRA DOS SANTOS","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005645,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":1527.94,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005556,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":1358.48,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005979,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006032,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006007,"loja":"Autostar_Jardins","vendedor":"KARINA ANGELO FRANCISCO","marca":"BMW","ppi":2304.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006124,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006066,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005923,"loja":"Euro Import_Curitiba","vendedor":"MARCELO SEIKI OZAWA","marca":"BMW","ppi":1491.2,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006149,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":1149.69,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006025,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":552.73,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":2057.18},{"mes":4,"contrato":2026006220,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":2723.13,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005724,"loja":"Euro Import_Curitiba","vendedor":"Wagner Gonçalves Rempel","marca":"BMW","ppi":1472.24,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005672,"loja":"Autostar_Morumbi","vendedor":"FABRICIO CASSIO SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005762,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005800,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":2705.4,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005917,"loja":"Autostar_Morumbi","vendedor":"MICHELE DE OLIVEIRA BALSAN","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006195,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":1089.83,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006106,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006093,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006151,"loja":"Autostar_Morumbi","vendedor":"Silvio Cesar Valerio","marca":"BMW","ppi":1509.13,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006173,"loja":"Autostar_Jardins","vendedor":"KARINA ANGELO FRANCISCO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006255,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":300.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026005627,"loja":"Autostar_Jardins","vendedor":"Alexandre Miranda","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":4,"contrato":2026006319,"loja":"Euro Import_Joinville","vendedor":"HENRIQUE MANOEL DA LUZ","marca":"MOTORRAD","ppi":377.92,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006306,"loja":"Euro Import_Londrina","vendedor":"AQUILAS LOMBARDI E LIMA","marca":"MOTORRAD","ppi":1302.18,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006384,"loja":"Euro Import_Curitiba","vendedor":"DAYANA DE FATIMA PERES AMARO","marca":"BMW","ppi":2875.28,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026005481,"loja":"Euro Import_Curitiba","vendedor":"ILSON KIYOSHI OZAWA JUNIOR","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006310,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":878.51,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006027,"loja":"Autostar_Morumbi","vendedor":"TALITA GOI RICCOBENE FERNANDES","marca":"MINI","ppi":4345.5,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006358,"loja":"Euro Import_Cascavel","vendedor":"EDUARDO SOUZA BADINI","marca":"BMW","ppi":4430.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006356,"loja":"Euro Import_Curitiba","vendedor":"CAROLINE JOAKIMSON","marca":"BMW","ppi":6237.63,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006404,"loja":"Euro Import_Londrina","vendedor":"JEFERSON CUNHA GOMES DA SILVA","marca":"BMW","ppi":2481.43,"acessorios":2000.0,"blindagem":0,"manutencao":6974,"garantia":0.0},{"mes":5,"contrato":2026006402,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":3820.74,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":6348.31},{"mes":5,"contrato":2026006433,"loja":"Euro Import_Joinville","vendedor":"FELIPE LEMES DE CAMARGO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006222,"loja":"Euro Import_Joinville","vendedor":"KLAUS WILLIAN DE MEDEIROS KOSTER","marca":"MOTORRAD","ppi":624.31,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006391,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":3551.12,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006272,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":605.49,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026005991,"loja":"Autostar_Morumbi","vendedor":"CLEITON FRANCELINO DA SILVA","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006136,"loja":"Euro Import_Curitiba","vendedor":"KAUE RICARDO BARBOZA BAASCH","marca":"BMW","ppi":4183.52,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006344,"loja":"Autostar_Jardins","vendedor":"RONALDO LOPES DA CRUZ","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006516,"loja":"Euro Import_Joinville","vendedor":"ADÃO EDIMAR SCHMOLLER","marca":"BMW","ppi":3026.96,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026005356,"loja":"Euro Import_Joinville","vendedor":"MIRIANE DOS SANTOS","marca":"BMW","ppi":3136.58,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006361,"loja":"Euro Import_Curitiba","vendedor":"CLAUDIA CRISTINA NORATO","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":5,"contrato":2026006323,"loja":"Autostar_Morumbi","vendedor":"EMMANUEL FABRI MOLINARIO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006367,"loja":"Euro Import_Curitiba","vendedor":"Bruna Ellen Guerra","marca":"MINI","ppi":2501.38,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":3883.22},{"mes":5,"contrato":2026006531,"loja":"Euro Import_Londrina","vendedor":"HENRIQUE DALVI","marca":"MOTORRAD","ppi":665.69,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006544,"loja":"Euro Import_Joinville","vendedor":"Andrey Henrique kmiecik","marca":"MOTORRAD","ppi":596.06,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006623,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006525,"loja":"Autostar_Morumbi","vendedor":"RODRIGO VICENTE DA SILVA","marca":"MINI","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006572,"loja":"Euro Import_Joinville","vendedor":"THIAGO LUIZ ROVEDA CAMPAGNOLO","marca":"BMW","ppi":7205.08,"acessorios":2000.0,"blindagem":0,"manutencao":0,"garantia":7906.43},{"mes":5,"contrato":2026006152,"loja":"Euro Import_Curitiba","vendedor":"Alexandro Candido Batista da Silva","marca":"BMW","ppi":2782.71,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006258,"loja":"Euro Import_Cascavel","vendedor":"ANTONIO CESAR DAINEZ","marca":"MOTORRAD","ppi":627.48,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006584,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1204.62,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006581,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":1219.29,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":3073.38},{"mes":5,"contrato":2026006586,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006608,"loja":"Euro Import_Londrina","vendedor":"TIAGO CESAR BERNARDES DE SOUZA","marca":"BMW","ppi":2752.07,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006640,"loja":"Euro Import_Londrina","vendedor":"GABRIEL LUPION RODRIGUES","marca":"MOTORRAD","ppi":688.25,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006342,"loja":"Euro Import_Londrina","vendedor":"TIAGO MARCOLINO MARCONDES","marca":"MOTORRAD","ppi":726.83,"acessorios":835.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006655,"loja":"Euro Import_Curitiba","vendedor":"MARIANA BERTOLI","marca":"BMW","ppi":2875.28,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006625,"loja":"Euro Import_Cascavel","vendedor":"MARCELO DE HOLLANDA JORGE","marca":"MOTORRAD","ppi":1047.54,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006662,"loja":"Euro Import_Cascavel","vendedor":"ENZO CAVALCANTE MIZERKOWSKI","marca":"MOTORRAD","ppi":2260.98,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006687,"loja":"Autostar_Vila Olímpia","vendedor":"CAMILA FERNANDES GUARANY","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006475,"loja":"Autostar_Vila Olímpia","vendedor":"ISRAEL RICARDO OLIVEIRA DE SOUZA","marca":"BMW","ppi":1361.57,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006499,"loja":"Euro Import_Joinville","vendedor":"Andrey Henrique kmiecik","marca":"MOTORRAD","ppi":4369.28,"acessorios":800.0,"blindagem":0,"manutencao":0,"garantia":3786.07},{"mes":5,"contrato":2026006657,"loja":"Autostar_Morumbi","vendedor":"Silvio Cesar Valerio","marca":"BMW","ppi":1069.26,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0},{"mes":5,"contrato":2026006732,"loja":"Autostar_Vila Olímpia","vendedor":"RODOLFO DA SILVA NASCIMENTO","marca":"BMW","ppi":0.0,"acessorios":0.0,"blindagem":0,"manutencao":0,"garantia":0.0}]
+;
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let activeMeses = new Set();
+let activeLojaFilter = 'ALL';
+let activeProduto = 'ALL';
+let activeMarca = 'ALL';  // 'ALL' | 'BMW' | 'MOTORRAD' | 'MINI' | 'OUTROS'
+let topSortKey = 'total_qtd';
+let botSortKey = 'total_qtd';
+const MES_NAMES = {0:'Todos',1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai'};
+const PROD_FIELDS = ['ppi','acessorios','blindagem','manutencao','garantia'];
+const PROD_LABELS = {ALL:'Todos',ppi:'PPI',acessorios:'Acessórios',blindagem:'Blindagem',manutencao:'Plano Manut.',garantia:'Garantia Ext.'};
+const PROD_COLORS = {ppi:'#0066CC',acessorios:'#22c97e',blindagem:'#c8a84b',manutencao:'#f07630',garantia:'#a04ee8'};
+const MARCA_COLORS = {ALL:'var(--text3)',BMW:'#0066CC',MOTORRAD:'#e84040',MINI:'#c8a84b',OUTROS:'var(--text3)'};
+const COLORS_TIPO  = ['#0066CC','#22c97e','#c8a84b','#f07630','#a04ee8'];
+const LOJA_NAMES = {};  // nomes já corrigidos no banco de dados
+const lojaLabel = (loja) => LOJA_NAMES[loja] || loja;
+
+
+const COLORS_LOJA = ['#0066CC','#1a80e6','#22c97e','#3db8f5','#c8a84b','#f07630','#a04ee8','#e84040','#22c9b0','#6680cc','#88aaff','#f0c040','#80ccbb','#cc8040'];
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+const fmtPct = v => v.toFixed(1) + '%';
+
+// rows matching mes + marca + produto (used for KPIs, tipos, trend, donut)
+function getFilteredByMes() {
+  return RAW_DATA.filter(r => {
+    if (activeMeses.size > 0 && !activeMeses.has(r.mes)) return false;
+    if (activeMarca !== 'ALL' && r.marca !== activeMarca) return false;
+    if (activeProduto !== 'ALL' && !(r[activeProduto] > 0)) return false;
+    return true;
+  });
+}
+
+// rows matching mes + marca + produto + loja (used for vendedor tables)
+function getFiltered() {
+  return RAW_DATA.filter(r => {
+    if (activeMeses.size > 0 && !activeMeses.has(r.mes)) return false;
+    if (activeMarca !== 'ALL' && r.marca !== activeMarca) return false;
+    if (activeProduto !== 'ALL' && !(r[activeProduto] > 0)) return false;
+    if (activeLojaFilter !== 'ALL' && r.loja !== activeLojaFilter) return false;
+    return true;
+  });
+}
+
+// allRows = todos os contratos do período (só filtro de mês, sem filtro de produto)
+// prodRows = contratos que têm o produto selecionado (filtro mês + produto)
+function aggregateByLoja(allRows, prodRows) {
+  const totalMap = {};  // denominador: total de contratos por loja
+  allRows.forEach(r => {
+    if (!totalMap[r.loja]) totalMap[r.loja] = 0;
+    totalMap[r.loja]++;
+  });
+
+  const map = {};
+  prodRows.forEach(r => {
+    if (!map[r.loja]) map[r.loja] = {loja:r.loja,contratos:0,ppi:0,acessorios:0,blindagem:0,manutencao:0,garantia:0};
+    const m = map[r.loja];
+    m.contratos++;
+    if (r.ppi > 0) m.ppi++;
+    if (r.acessorios > 0) m.acessorios++;
+    if (r.blindagem > 0) m.blindagem++;
+    if (r.manutencao > 0) m.manutencao++;
+    if (r.garantia > 0) m.garantia++;
+  });
+
+  // garante que lojas sem nenhum produto no filtro ainda aparecem com contratos
+  Object.keys(totalMap).forEach(loja => {
+    if (!map[loja]) map[loja] = {loja,contratos:0,ppi:0,acessorios:0,blindagem:0,manutencao:0,garantia:0};
+  });
+
+  return Object.values(map).map(m => {
+    const total_cttos = totalMap[m.loja] || 0;  // denominador correto
+    const total_qtd = activeProduto === 'ALL'
+      ? m.ppi+m.acessorios+m.blindagem+m.manutencao+m.garantia
+      : m[activeProduto] || 0;
+    return {
+      ...m,
+      total_cttos,   // total real de contratos (com e sem produto)
+      total_qtd,
+      penetracao_pct: total_cttos > 0
+        ? +(total_qtd / total_cttos * 100).toFixed(1)
+        : 0
+    };
+  }).sort((a,b) => b.penetracao_pct - a.penetracao_pct);
+}
+
+function aggregateByVendedor(allRows, prodRows) {
+  const totalMap = {};  // denominador: total de contratos por vendedor
+  allRows.forEach(r => {
+    const key = r.loja + '||' + r.vendedor;
+    if (!totalMap[key]) totalMap[key] = {loja:r.loja,vendedor:r.vendedor,n:0};
+    totalMap[key].n++;
+  });
+
+  const map = {};
+  prodRows.forEach(r => {
+    const key = r.loja + '||' + r.vendedor;
+    if (!map[key]) map[key] = {loja:r.loja,vendedor:r.vendedor,contratos:0,ppi:0,acessorios:0,blindagem:0,manutencao:0,garantia:0};
+    const m = map[key];
+    m.contratos++;
+    if (r.ppi > 0) m.ppi++;
+    if (r.acessorios > 0) m.acessorios++;
+    if (r.blindagem > 0) m.blindagem++;
+    if (r.manutencao > 0) m.manutencao++;
+    if (r.garantia > 0) m.garantia++;
+  });
+
+  // garante que vendedores sem produto no filtro ainda aparecem
+  Object.keys(totalMap).forEach(key => {
+    if (!map[key]) map[key] = {loja:totalMap[key].loja,vendedor:totalMap[key].vendedor,contratos:0,ppi:0,acessorios:0,blindagem:0,manutencao:0,garantia:0};
+  });
+
+  return Object.values(map).map(m => {
+    const key = m.loja + '||' + m.vendedor;
+    const total_cttos = totalMap[key] ? totalMap[key].n : 0;  // denominador correto
+    const total_qtd = activeProduto === 'ALL'
+      ? m.ppi+m.acessorios+m.blindagem+m.manutencao+m.garantia
+      : m[activeProduto] || 0;
+    return {
+      ...m,
+      total_cttos,
+      total_qtd,
+      penetracao_pct: total_cttos > 0
+        ? +(total_qtd / total_cttos * 100).toFixed(1)
+        : 0
+    };
+  });
+}
+
+// ── MÊS FILTER ────────────────────────────────────────────────────────────────
+function getMesLabel() {
+  if (activeMeses.size === 0) return '● Jan – Mai 2026';
+  const sorted = [...activeMeses].sort();
+  return '● ' + sorted.map(m => MES_NAMES[m]).join(' + ') + ' 2026';
+}
+
+function getMesSubLabel() {
+  if (activeMeses.size === 0) return 'Jan–Mai 2026';
+  return [...activeMeses].sort().map(m => MES_NAMES[m]).join(' + ') + ' 2026';
+}
+
+function setMes(mes) {
+  if (mes === 0) {
+    // "Todos" clears all selections
+    activeMeses.clear();
+  } else {
+    // toggle individual month
+    if (activeMeses.has(mes)) {
+      activeMeses.delete(mes);
+    } else {
+      activeMeses.add(mes);
+    }
+  }
+  // sync button states
+  document.getElementById('mes-btn-0').classList.toggle('active', activeMeses.size === 0);
+  [1,2,3,4,5].forEach(m => {
+    document.getElementById('mes-btn-' + m).classList.toggle('active', activeMeses.has(m));
+  });
+  document.getElementById('badgePeriod').textContent = getMesLabel();
+  renderAll();
+}
+
+// ── PRODUTO FILTER ────────────────────────────────────────────────────────────
+function setProd(prod) {
+  activeProduto = prod;
+  // reset button styles
+  document.querySelectorAll('.prod-btn').forEach(b => {
+    b.className = 'prod-btn';
+  });
+  const btn = document.getElementById('prod-btn-' + prod);
+  if (btn) btn.classList.add('active-' + prod);
+  renderAll();
+}
+
+// ── MARCA FILTER ──────────────────────────────────────────────────────────────
+function setMarca(marca) {
+  activeMarca = marca;
+  document.querySelectorAll('.marca-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('marca-btn-' + marca).classList.add('active');
+  renderAll();
+}
+
+
+function renderKPIs() {
+  const rows = getFilteredByMes();
+  const total = rows.length;
+  const comAgr = activeProduto === 'ALL'
+    ? rows.filter(r => (r.ppi+r.acessorios+r.blindagem+r.manutencao+r.garantia) > 0).length
+    : rows.filter(r => r[activeProduto] > 0).length;
+  const totalProd = activeProduto === 'ALL'
+    ? rows.reduce((s,r)=>s+(r.ppi>0?1:0)+(r.acessorios>0?1:0)+(r.blindagem>0?1:0)+(r.manutencao>0?1:0)+(r.garantia>0?1:0),0)
+    : rows.filter(r=>r[activeProduto]>0).length;
+  const pen = total > 0 ? +(comAgr/total*100).toFixed(1) : 0;
+  const media = comAgr > 0 ? +(totalProd/comAgr).toFixed(2) : 0;
+  const prodLabel = activeProduto === 'ALL' ? 'todos os produtos' : PROD_LABELS[activeProduto];
+  const mesLabel  = getMesSubLabel();
+
+  const cards = [
+    {icon:'📋', val:total.toLocaleString('pt-BR'),     label:'Total Contratos',      sub:mesLabel,                     cls:''},
+    {icon:'✅', val:comAgr.toLocaleString('pt-BR'),    label:'Contratos c/ Produto', sub:`${prodLabel} · de ${total}`, cls:''},
+    {icon:'📈', val:fmtPct(pen),                       label:'Penetração',            sub:`taxa · ${prodLabel}`,        cls:'kpi-accent-blue'},
+    {icon:'🎯', val:totalProd.toLocaleString('pt-BR'), label:'Produtos Vendidos',     sub:prodLabel,                    cls:'kpi-accent-green'},
+    {icon:'⚡', val:media.toFixed(2).replace('.',','), label:'Média Produtos/Ctto',   sub:'contratos com produto',      cls:'kpi-accent-gold'},
+  ];
+  document.getElementById('kpiGrid').innerHTML = cards.map(c=>`
+    <div class="kpi-card ${c.cls}">
+      <span class="kpi-icon">${c.icon}</span>
+      <div class="kpi-value">${c.val}</div>
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ── RENDER TIPOS ──────────────────────────────────────────────────────────────
+function renderTipos() {
+  // always use full mes-filtered rows (not produto-filtered) so all cards stay visible
+  const rows = RAW_DATA.filter(r => (activeMeses.size === 0 || activeMeses.has(r.mes)) && (activeMarca === 'ALL' || r.marca === activeMarca));
+  const entries = [
+    {key:'ppi',       label:'PPI'},
+    {key:'acessorios',label:'Acessórios'},
+    {key:'blindagem', label:'Blindagem'},
+    {key:'manutencao',label:'Plano Manut.'},
+    {key:'garantia',  label:'Garantia Ext.'},
+  ];
+  const counts = entries.map(e => ({...e, v: rows.filter(r=>r[e.key]>0).length}));
+  const total  = counts.reduce((s,c)=>s+c.v, 0);
+  document.getElementById('tipoGrid').innerHTML = counts.map((c,i)=>{
+    const isActive = activeProduto === c.key;
+    const isDim    = activeProduto !== 'ALL' && !isActive;
+    return `<div class="tipo-card" onclick="setProd(activeProduto==='${c.key}'?'ALL':'${c.key}')"
+        style="cursor:pointer;opacity:${isDim?.45:1};${isActive?`box-shadow:0 0 0 2px ${COLORS_TIPO[i]};`:''};transition:opacity .2s,box-shadow .2s">
+      <div class="tipo-name">${c.label}</div>
+      <div class="tipo-val" style="color:${COLORS_TIPO[i]}">${c.v.toLocaleString('pt-BR')}</div>
+      <div class="tipo-pct">${total>0?(c.v/total*100).toFixed(1):0}% do mix · ${c.v} cttos</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER LOJA TABLE ─────────────────────────────────────────────────────────
+function renderLojaTable() {
+  const allRows  = RAW_DATA.filter(r => (activeMeses.size === 0 || activeMeses.has(r.mes)) && (activeMarca === 'ALL' || r.marca === activeMarca));
+  const prodRows = getFilteredByMes();
+  const lojas = aggregateByLoja(allRows, prodRows);
+  document.getElementById('lojaBody').innerHTML = lojas.length ? lojas.map((l,i)=>{
+    const rankCls = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const pctCls = l.penetracao_pct>=60?'green':l.penetracao_pct>=35?'':'orange';
+    return `<tr>
+      <td style="padding-left:16px"><span class="rank-num ${rankCls}">${i+1}</span></td>
+      <td><span style="font-size:.78rem;font-weight:500;color:var(--text)">${lojaLabel(l.loja)}</span></td>
+      <td class="right"><span class="valor-cell" style="font-size:.85rem">${l.total_cttos}</span></td>
+      <td class="right"><div class="pct-bar-wrap">
+        <div class="pct-bar-bg"><div class="pct-bar-fill ${pctCls}" style="width:${Math.min(l.penetracao_pct,100)}%"></div></div>
+        <span class="pct-text">${fmtPct(l.penetracao_pct)}</span>
+      </div></td>
+      <td class="right"><span class="valor-cell">${l.total_qtd}</span></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="5"><div class="empty-state">Nenhum dado para o período selecionado</div></td></tr>`;
+}
+
+// ── RENDER TREND ──────────────────────────────────────────────────────────────
+function renderTrend() {
+  const byMes = [1,2,3,4,5].map(m => {
+    const rows = RAW_DATA.filter(r => r.mes===m && (activeProduto==='ALL' || r[activeProduto]>0));
+    const prod = rows.reduce((s,r)=>s+(r.ppi>0?1:0)+(r.acessorios>0?1:0)+(r.blindagem>0?1:0)+(r.manutencao>0?1:0)+(r.garantia>0?1:0),0);
+    const cttos = rows.length;
+    return {m, prod, cttos, pct: cttos>0?(prod/(cttos*5)*100).toFixed(1):0};
+  });
+  const maxProd = Math.max(...byMes.map(x=>x.prod), 1);
+  const trendColors = ['#0066CC','#1a80e6','#22c97e','#c8a84b','#a04ee8'];
+
+  document.getElementById('trendChart').innerHTML = byMes.map((x,i)=>{
+    const h = Math.round((x.prod/maxProd)*68)+8;
+    const isActive = activeMeses.size === 0 || activeMeses.has(x.m);
+    return `<div class="trend-col" onclick="setMes(${x.m})" style="cursor:pointer">
+      <div class="trend-val" style="opacity:${isActive?1:.3}">${x.prod}</div>
+      <div class="trend-bar" style="height:${h}px;background:${trendColors[i]};opacity:${isActive?.85:.2};
+        ${activeMeses.has(x.m)?'outline:2px solid rgba(255,255,255,.4);outline-offset:-2px;border-radius:4px 4px 0 0':''}"
+        title="${MES_NAMES[x.m]}: ${x.prod} produtos (${x.pct}%)"></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('trendLabels').innerHTML = byMes.map((x,i)=>{
+    const isActive = activeMeses.size === 0 || activeMeses.has(x.m);
+    return `<div style="flex:1;text-align:center;opacity:${isActive?1:.4};cursor:pointer" onclick="setMes(${x.m})">
+      <div style="font-size:.6rem;color:${activeMeses.has(x.m)?'var(--blue-light)':'var(--text3)'};letter-spacing:.08em;font-weight:${activeMeses.has(x.m)?700:400}">${MES_NAMES[x.m]}</div>
+      <div style="font-size:.58rem;color:var(--text2)">${x.pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER DONUT ──────────────────────────────────────────────────────────────
+function renderDonut() {
+  const rows = getFilteredByMes();
+  const t = {
+    'PPI': rows.filter(r=>r.ppi>0).length,
+    'Acessórios': rows.filter(r=>r.acessorios>0).length,
+    'Blindagem': rows.filter(r=>r.blindagem>0).length,
+    'Plano Manut.': rows.filter(r=>r.manutencao>0).length,
+    'Garantia Ext.': rows.filter(r=>r.garantia>0).length,
+  };
+  const total = Object.values(t).reduce((a,b)=>a+b,0) || 1;
+  const entries = Object.entries(t);
+  const cx=55,cy=55,r=46,ir=25;
+  let start=-Math.PI/2, paths='';
+  entries.forEach(([k,v],i)=>{
+    if(v===0) return;
+    const angle=(v/total)*2*Math.PI, end=start+angle;
+    const x1=cx+r*Math.cos(start),y1=cy+r*Math.sin(start);
+    const x2=cx+r*Math.cos(end),  y2=cy+r*Math.sin(end);
+    const ix1=cx+ir*Math.cos(start),iy1=cy+ir*Math.sin(start);
+    const ix2=cx+ir*Math.cos(end),  iy2=cy+ir*Math.sin(end);
+    const lg=angle>Math.PI?1:0;
+    paths+=`<path d="M${x1},${y1} A${r},${r} 0 ${lg},1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${lg},0 ${ix1},${iy1} Z" fill="${COLORS_TIPO[i]}" opacity=".9"/>`;
+    start=end;
+  });
+  const svg=`<svg width="110" height="110" viewBox="0 0 110 110" style="flex-shrink:0">${paths}<text x="55" y="59" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text2)" font-family="Barlow Condensed">MIX</text></svg>`;
+  const legend=`<div class="donut-legend">${entries.map(([k,v],i)=>`
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${COLORS_TIPO[i]}"></div>
+      <div class="legend-name">${k}</div>
+      <div class="legend-val">${v}</div>
+      <div class="legend-pct">${(v/total*100).toFixed(0)}%</div>
+    </div>`).join('')}</div>`;
+  document.getElementById('donutArea').innerHTML = svg+legend;
+}
+
+// ── LOJA FILTERS ──────────────────────────────────────────────────────────────
+function renderLojaFilters() {
+  const lojas = [...new Set(RAW_DATA.map(r=>r.loja))].sort();
+  document.getElementById('lojaFilters').innerHTML =
+    `<span class="filter-label">Filtrar loja:</span>` +
+    ['ALL',...lojas].map(l=>`
+      <button class="filter-btn ${l===activeLojaFilter?'active':''}" onclick="setLojaFilter('${l}')">
+        ${l==='ALL'?'Todas':lojaLabel(l).replace('Euro Import_','').replace('Autostar_','')}
+      </button>`).join('');
+}
+
+function setLojaFilter(loja) {
+  activeLojaFilter = loja;
+  renderLojaFilters();
+  renderVendedores();
+}
+
+// ── RENDER VENDEDORES ─────────────────────────────────────────────────────────
+function renderVendedores() {
+  const allRows  = RAW_DATA.filter(r => {
+    if (activeMeses.size > 0 && !activeMeses.has(r.mes)) return false;
+    if (activeLojaFilter !== 'ALL' && r.loja !== activeLojaFilter) return false;
+    return true;
+  });
+  const prodRows = getFiltered();
+  const all = aggregateByVendedor(allRows, prodRows);
+
+  const searchTop = (document.getElementById('searchTop')||{value:''}).value.toLowerCase();
+  const searchBot = (document.getElementById('searchBot')||{value:''}).value.toLowerCase();
+
+  const topList = [...all].filter(v=>v.vendedor.toLowerCase().includes(searchTop))
+    .sort((a,b)=>b[topSortKey]-a[topSortKey]).slice(0,20);
+
+  const botList = [...all].filter(v=>v.total_cttos>=3 && v.vendedor.toLowerCase().includes(searchBot))
+    .sort((a,b)=>a[botSortKey]-b[botSortKey]).slice(0,20);
+
+  document.getElementById('topCount').textContent = `${all.length} vendedores`;
+
+  // Fixed column order: Posição | Nome | Contratos | Qtd. Produto | Penetração
+  const rowHtml = (v,i,side) => {
+    const rankCls = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const pctCls  = v.penetracao_pct>=60?'green':v.penetracao_pct>=35?'':'orange';
+    const dot     = side==='bot' ? `<div class="alert-dot ${v.penetracao_pct<20?'':'orange'}"></div>` : '';
+    return `<tr>
+      <td><span class="rank-num ${rankCls}">${i+1}</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px">${dot}
+        <div><div class="vend-name">${v.vendedor}</div>
+        <span class="store-tag">${lojaLabel(v.loja).replace('Euro Import_','').replace('Autostar_','')}</span></div>
+      </div></td>
+      <td class="right"><span style="font-size:.8rem;font-weight:600;color:var(--text2)">${v.total_cttos}</span></td>
+      <td class="right"><span class="valor-cell" style="font-size:.9rem">${v.total_qtd}</span></td>
+      <td class="right"><div class="pct-bar-wrap">
+        <div class="pct-bar-bg"><div class="pct-bar-fill ${pctCls}" style="width:${Math.min(v.penetracao_pct,100)}%"></div></div>
+        <span class="pct-text">${fmtPct(v.penetracao_pct)}</span>
+      </div></td>
+    </tr>`;
+  };
+
+  document.getElementById('topBody').innerHTML = topList.length
+    ? topList.map((v,i)=>rowHtml(v,i,'top')).join('')
+    : '<tr><td colspan="5"><div class="empty-state">Sem dados</div></td></tr>';
+
+  document.getElementById('botBody').innerHTML = botList.length
+    ? botList.map((v,i)=>rowHtml(v,i,'bot')).join('')
+    : '<tr><td colspan="5"><div class="empty-state">Sem dados</div></td></tr>';
+}
+
+// ── BAR CHART LOJAS ───────────────────────────────────────────────────────────
+function renderLojaBarChart() {
+  const allRows  = RAW_DATA.filter(r => (activeMeses.size === 0 || activeMeses.has(r.mes)) && (activeMarca === 'ALL' || r.marca === activeMarca));
+  const prodRows = getFilteredByMes();
+  const lojas = aggregateByLoja(allRows, prodRows);
+  const maxVal = Math.max(...lojas.map(l=>l.total_qtd), 1);
+  document.getElementById('barChartMeta').textContent = `Quantidade total · ${getMesSubLabel()}`;
+  document.getElementById('lojaBarChart').innerHTML = lojas.map((l,i)=>{
+    const pct = (l.total_qtd/maxVal)*100;
+    return `<div class="bar-row">
+      <div class="bar-row-label" title="${lojaLabel(l.loja)}">${lojaLabel(l.loja)}</div>
+      <div class="bar-row-track">
+        <div class="bar-row-fill" style="width:${pct}%;background:linear-gradient(90deg,${COLORS_LOJA[i]},${COLORS_LOJA[i]}cc)">
+          <span class="bar-row-val">${l.total_qtd}</span>
+        </div>
+      </div>
+      <div class="bar-row-pct">${fmtPct(l.penetracao_pct)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+document.addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  const tabsEl = tab.closest('.tabs');
+  if (!tabsEl) return;
+  tabsEl.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  const key  = tab.dataset.key;
+  const side = tab.dataset.side;
+  if (side==='top') topSortKey = key;
+  else botSortKey = key;
+  renderVendedores();
+});
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  document.getElementById('themeKnob').textContent = isLight ? '☀️' : '🌙';
+  try { localStorage.setItem('bmw-theme', isLight?'light':'dark'); } catch(e){}
+}
+(function(){
+  let s='dark'; try{s=localStorage.getItem('bmw-theme')||'dark';}catch(e){}
+  if(s==='light'){
+    document.documentElement.classList.add('light');
+    document.addEventListener('DOMContentLoaded',()=>{
+      const k=document.getElementById('themeKnob'); if(k)k.textContent='☀️';
+    });
+  }
+})();
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderKPIs();
+  renderTipos();
+  renderLojaTable();
+  renderTrend();
+  renderDonut();
+  renderLojaFilters();
+  renderVendedores();
+}
+
+renderAll();
+</script>
+</body>
+</html>
